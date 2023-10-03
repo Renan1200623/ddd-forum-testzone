@@ -2,10 +2,40 @@ plugins {
   id "com.github.node-gradle.node" version "7.0.0"
 }
 
-task dance {
-  println 'dancin'
+// Build project using npm run build custom script
+task build_project(type: Exec) {
+  if (System.properties['os.name'].toLowerCase().contains('windows')) {
+    commandLine 'npm.cmd', 'run', 'build'
+  } else {
+      commandLine 'npm', 'run', 'build'
+  }
 }
 
-task sal(type: Exec) {
-  commandLine 'npm_run_build'
+// Installs the project's dependencies dependencies 
+task install_dependencies(type: Exec) {
+  if (System.properties['os.name'].toLowerCase().contains('windows')) {
+    commandLine 'npm.cmd', 'install'
+  } else {
+      commandLine 'npm', 'install'
+  }
+}
+
+// Deletes the current ./dist folder, removing all it's files
+task delete_dist(type: Delete) {
+    delete 'dist'
+}
+
+// Transpiles the project ot JavaScript
+task transpile_project(type: Exec) {
+    commandLine 'node', 'node_modules/typescript/bin/tsc'
+}
+
+// Builds the project
+task run_build(type: DefaultTask) {
+    dependsOn delete_dist, transpile_project
+}
+
+// Generates the JSDoc documentation
+task generate_jsdoc(type: Exec) {
+    commandLine 'node', 'node_modules/jsdoc/jsdoc.js', '-r', '-c', 'jsdoc.config.json'
 }
